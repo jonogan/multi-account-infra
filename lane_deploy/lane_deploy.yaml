@@ -1,0 +1,656 @@
+Metadata:
+  License: Apache-2.0
+Description: 'Creates all required infrastructure to run base AWS workloads in an account, 
+including VPCs, Subnets, Security, RTs, ACLs, DNS Resolvers to and from onprem'
+
+Parameters:
+  EnvironmentName:
+    Type: String
+  VpcCidr:
+    Type: String
+  PublicSubnet1CIDR:
+    Type: String
+  PublicSubnet2CIDR:
+    Type: String
+  PublicSubnet3CIDR:
+    Type: String
+  PrivateSubnet1CIDR:
+    Type: String
+  PrivateSubnet2CIDR:
+    Type: String
+  PrivateSubnet3CIDR:
+    Type: String
+#  GLBSubnet1CIDR:
+#    Type: String
+#  GLBSubnet2CIDR:
+#    Type: String
+#  GLBSubnet3CIDR:
+#    Type: String
+#  TGWSubnet1CIDR:
+#    Type: String
+#  TGWSubnet2CIDR:
+#    Type: String
+#  TGWSubnet3CIDR:
+#    Type: String
+#  GLBEndpointService:
+#    Type: String
+#  TransitGatewayId:
+#    Type: String
+
+Conditions:
+  IsStg: !Equals
+    - !Ref EnvironmentName
+    - stg-01
+  IsProd: !Equals
+    - !Ref EnvironmentName
+    - prod-01
+
+  IsProdAccount: !Or 
+    - !Condition IsStg
+    - !Condition IsProd
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-VPC
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-IGW
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  ######### GLB Endpoints ##########
+
+#  GWLBe1:
+#    Type: AWS::EC2::VPCEndpoint
+#    Properties: 
+#      ServiceName: !Sub ${GLBEndpointService}
+#      SubnetIds: 
+#        - !Ref GWLBSubnet1
+#      VpcEndpointType: GatewayLoadBalancer
+#      VpcId: !Ref VPC
+#      #Name: !Sub ${EnvironmentName}-GWLBe-2a
+#
+#  GWLBe2:
+#    Type: AWS::EC2::VPCEndpoint
+#    Properties: 
+#      ServiceName: !Sub ${GLBEndpointService}
+#      SubnetIds: 
+#        - !Ref GWLBSubnet2
+#      VpcEndpointType: GatewayLoadBalancer
+#      VpcId: !Ref VPC
+#      #Name: !Sub ${EnvironmentName}-GWLBe-2b
+
+  #GWLBe3:
+  #  Type: AWS::EC2::VPCEndpoint
+  #  Properties: 
+  #    ServiceName: !Sub ${GLBEndpointService}
+  #    SubnetIds: 
+  #      - !Ref GWLBSubnet3
+  #    VpcEndpointType: GatewayLoadBalancer
+  #    VpcId: !Ref VPC
+      #Name: !Sub ${EnvironmentName}-GWLBe-2c
+
+
+######### SUBNETS ##########
+  
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-west-2a
+      CidrBlock: !Ref PublicSubnet1CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-PUB1-2a
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-west-2b
+      CidrBlock: !Ref PublicSubnet2CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-PUB1-2b
+  
+  #PublicSubnet3:
+  #  Type: AWS::EC2::Subnet
+  #  Properties:
+  #    VpcId: !Ref VPC
+  #    AvailabilityZone: us-west-2c
+  #    CidrBlock: !Ref PublicSubnet3CIDR
+  #    MapPublicIpOnLaunch: true
+  #    Tags:
+  #      - Key: Name
+  #        Value: !Sub ${EnvironmentName}-PUB3-2c
+  
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-west-2a
+      CidrBlock: !Ref PrivateSubnet1CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-PRIV1-2a
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-west-2b
+      CidrBlock: !Ref PrivateSubnet2CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-PRIV1-2b
+
+  #PrivateSubnet3:
+  #  Type: AWS::EC2::Subnet
+  #  Properties:
+  #    VpcId: !Ref VPC
+  #    AvailabilityZone: us-west-2c
+  #    CidrBlock: !Ref PrivateSubnet3CIDR
+  #    MapPublicIpOnLaunch: false
+  #    Tags:
+  #      - Key: Name
+  #        Value: !Sub ${EnvironmentName}-PRIV3-2c
+
+#  GWLBSubnet1:
+#    Type: AWS::EC2::Subnet
+#    Properties:
+#      VpcId: !Ref VPC
+#      AvailabilityZone: us-west-2a
+#      CidrBlock: !Ref GLBSubnet1CIDR
+#      MapPublicIpOnLaunch: false
+#      Tags:
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-GLBe-2a
+#
+#  GWLBSubnet2:
+#    Type: AWS::EC2::Subnet
+#    Properties:
+#      VpcId: !Ref VPC
+#      AvailabilityZone: us-west-2b
+#      CidrBlock: !Ref GLBSubnet2CIDR
+#      MapPublicIpOnLaunch: false
+#      Tags:
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-GLBe-2b
+  
+  #GWLBSubnet3:
+  #  Type: AWS::EC2::Subnet
+  #  Properties:
+  #    VpcId: !Ref VPC
+  #    AvailabilityZone: us-west-2c
+  #    CidrBlock: !Ref GLBSubnet3CIDR
+  #    MapPublicIpOnLaunch: false
+  #    Tags:
+  #      - Key: Name
+  #        Value: !Sub ${EnvironmentName}-GLBe-2c
+
+#  TGWSubnet1:
+#    Type: AWS::EC2::Subnet
+#    Properties:
+#      VpcId: !Ref VPC
+#      AvailabilityZone: us-west-2a
+#      CidrBlock: !Ref TGWSubnet1CIDR
+#      MapPublicIpOnLaunch: false
+#      Tags:
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-TGW-2a
+#
+#  TGWSubnet2:
+#    Type: AWS::EC2::Subnet
+#    Properties:
+#      VpcId: !Ref VPC
+#      AvailabilityZone: us-west-2b
+#      CidrBlock: !Ref TGWSubnet2CIDR
+#      MapPublicIpOnLaunch: false
+#      Tags:
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-TGW-2b
+  
+  #TGWSubnet3:
+  #  Type: AWS::EC2::Subnet
+  #  Properties:
+  #    VpcId: !Ref VPC
+  #    AvailabilityZone: us-west-2c
+  #    CidrBlock: !Ref TGWSubnet3CIDR
+  #    MapPublicIpOnLaunch: false
+  #    Tags:
+  #      - Key: Name
+  #        Value: !Sub ${EnvironmentName}-TGW-2c
+
+######### TRANSIT GATEWAY (SUBNETS REQUIRED IN ADVANCE) ##########
+
+#  TGWAttachment:
+#    Type: AWS::EC2::TransitGatewayAttachment
+#    Properties:
+#      SubnetIds: 
+#        - !Ref TGWSubnet1
+#        - !Ref TGWSubnet2
+#        #- !Ref TGWSubnet3
+#      Tags: 
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-TGWa
+#      TransitGatewayId: !Ref TransitGatewayId
+#      VpcId: !Ref VPC
+
+######### DNS Resolver Endpoint ##########
+#  ResolverEndpoint:
+#    Type: AWS::Route53Resolver::ResolverEndpoint
+#    Condition: IsStg
+#    Properties: 
+#      Direction: OUTBOUND
+#      IpAddresses: 
+#        - SubnetId: !Ref PrivateSubnet1
+#        - SubnetId: !Ref PrivateSubnet1
+#      Name: !Sub dnsOutboundOnPrem-${EnvironmentName}-VPC
+#      SecurityGroupIds: 
+#        - !Ref DefaultNoIngressSecurityGroup
+#
+########## Resolver Rule ##########
+#  ResolverRule:
+#    Type: AWS::Route53Resolver::ResolverRule
+#    Condition: IsStg
+#    Properties: 
+#      DomainName: stormwind.local
+#      Name: dnsOnPremRule
+#      ResolverEndpointId: !Ref ResolverEndpoint
+#      RuleType: FORWARD
+#      TargetIps:
+#        - 
+#          Ip: 10.100.33.100
+#          Port: 53
+#        - 
+#          Ip: 10.102.33.100
+#          Port: 53
+
+######### Resolver Rule Association ##########
+#  ResolverRuleAssociation:
+#    Type: AWS::Route53Resolver::ResolverRuleAssociation
+#    Condition: IsStg
+#    Properties: 
+#      Name: !Sub ${EnvironmentName}-resolver-rule-association
+#      ResolverRuleId: !Ref ResolverRule
+#      VPCId: !Ref VPC
+
+######### ROUTE TABLES ##########
+
+#  GWLB1RouteTable:
+#    Type: AWS::EC2::RouteTable
+#    Properties:
+#      VpcId: !Ref VPC
+#      Tags:
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-GWLBw-2a-RT
+#
+#  GWLB2RouteTable:
+#    Type: AWS::EC2::RouteTable
+#    Properties:
+#      VpcId: !Ref VPC
+#      Tags:
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-GWLBw-2b-RT
+#  
+#  GWLBSubnet1TGWRoute:
+#    DependsOn: TGWAttachment
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref GWLB1RouteTable
+#      DestinationCidrBlock: 10.0.0.0/8
+#      TransitGatewayId: !Ref TransitGatewayId
+#
+#  GWLBSubnet2TGWRoute:
+#    DependsOn: TGWAttachment
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref GWLB2RouteTable
+#      DestinationCidrBlock: 10.0.0.0/8
+#      TransitGatewayId: !Ref TransitGatewayId
+#
+#  GWLB1InternetRoute:
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref GWLB1RouteTable
+#      DestinationCidrBlock: 0.0.0.0/0
+#      GatewayId: !Ref InternetGateway
+#
+#  GWLB2InternetRoute:
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref GWLB2RouteTable
+#      DestinationCidrBlock: 0.0.0.0/0
+#      GatewayId: !Ref InternetGateway
+#
+#  RouteTableAssociationGWLBSubnet1:
+#    Type: AWS::EC2::SubnetRouteTableAssociation
+#    Properties:
+#      RouteTableId:
+#        Ref: GWLB1RouteTable
+#      SubnetId:
+#        Ref: GWLBSubnet1
+#
+#  RouteTableAssociationGWLBSubnet2:
+#    Type: AWS::EC2::SubnetRouteTableAssociation
+#    Properties:
+#      RouteTableId:
+#        Ref: GWLB2RouteTable
+#      SubnetId:
+#        Ref: GWLBSubnet2
+#
+#  TGWSubnet1RouteTable:
+#    Type: AWS::EC2::RouteTable
+#    Properties:
+#      VpcId: !Ref VPC
+#      Tags:
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-TGW-2a-RT
+#  TGWSubnet2RouteTable:
+#    Type: AWS::EC2::RouteTable
+#    Properties:
+#      VpcId: !Ref VPC
+#      Tags:
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-TGW-2b-RT
+#  TGWSubnet1TGWRoute:
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref TGWSubnet1RouteTable
+#      DestinationCidrBlock: 0.0.0.0/0
+#      TransitGatewayId: !Ref TransitGatewayId
+#  TGWSubnet2TGWRoute:
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref TGWSubnet2RouteTable
+#      DestinationCidrBlock: 0.0.0.0/0
+#      TransitGatewayId: !Ref TransitGatewayId
+#  RouteTableAssociationTGWSubnet1:
+#    Type: AWS::EC2::SubnetRouteTableAssociation
+#    Properties:
+#      RouteTableId:
+#        Ref: TGWSubnet1RouteTable
+#      SubnetId:
+#        Ref: TGWSubnet1
+#  RouteTableAssociationTGWSubnet2:
+#    Type: AWS::EC2::SubnetRouteTableAssociation
+#    Properties:
+#      RouteTableId:
+#        Ref: TGWSubnet2RouteTable
+#      SubnetId:
+#        Ref: TGWSubnet2
+#
+#  IGWRouteTable:
+#    Type: AWS::EC2::RouteTable
+#    Properties:
+#      VpcId: !Ref VPC
+#      Tags:
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-IGW-Ingress-RT
+
+  ###ENSURE LOCAL ROUTE IS IMPLICIT###
+  
+#  IGWRoute1:
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref IGWRouteTable
+#      DestinationCidrBlock: !Ref PublicSubnet1CIDR
+#      VpcEndpointId: !Ref GWLBe1
+#
+#  IGWRoute2:
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref IGWRouteTable
+#      DestinationCidrBlock: !Ref PublicSubnet2CIDR
+#      VpcEndpointId: !Ref GWLBe2
+  
+  #IGWRoute3:
+  #  Type: AWS::EC2::Route
+  #  Properties:
+  #    RouteTableId: !Ref IGWRouteTable
+  #    DestinationCidrBlock: !Ref PublicSubnet3CIDR
+  #    GatewayId: !Ref InternetGateway
+  #    VpcEndpointId: !Ref GWLBe3
+  
+#  IGWRouteTableAssociation:
+#    Type: AWS::EC2::GatewayRouteTableAssociation
+#    Properties: 
+#      GatewayId: !Ref InternetGateway
+#      RouteTableId: !Ref IGWRouteTable
+
+  
+#  PublicRouteTable1:
+#    Type: AWS::EC2::RouteTable
+#    Properties:
+#      VpcId: !Ref VPC
+#      Tags:
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-PUB1-2a-RT
+#  
+#  PublicSubnet1Route1:
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref PublicRouteTable1
+#      DestinationCidrBlock: 0.0.0.0/0
+#      VpcEndpointId: !Ref GWLBe1
+#
+#  PublicSubnet1Route2:
+#    DependsOn: TGWAttachment
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref PublicRouteTable1
+#      DestinationCidrBlock: 10.0.0.0/8
+#      TransitGatewayId: !Ref TransitGatewayId
+#  
+#  PublicSubnet1RouteTableAssociation:
+#    Type: AWS::EC2::SubnetRouteTableAssociation
+#    Properties:
+#      RouteTableId: !Ref PublicRouteTable1
+#      SubnetId: !Ref PublicSubnet1
+#  
+#  PublicRouteTable2:
+#    Type: AWS::EC2::RouteTable
+#    Properties:
+#      VpcId: !Ref VPC
+#      Tags:
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-PUB2-2b-RT
+#
+#  PublicSubnet2Route1:
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref PublicRouteTable2
+#      DestinationCidrBlock: 0.0.0.0/0
+#      VpcEndpointId: !Ref GWLBe2
+#
+#  PublicSubnet2Route2:
+#    DependsOn: TGWAttachment
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref PublicRouteTable2
+#      DestinationCidrBlock: 10.0.0.0/8
+#      TransitGatewayId: !Ref TransitGatewayId
+#  
+#  PublicSubnet2RouteTableAssociation:
+#    Type: AWS::EC2::SubnetRouteTableAssociation
+#    Properties:
+#      RouteTableId: !Ref PublicRouteTable2
+#      SubnetId: !Ref PublicSubnet2
+
+  #PublicRouteTable3:
+  #  Type: AWS::EC2::RouteTable
+  #  Properties:
+  #    VpcId: !Ref VPC
+  #    Tags:
+  #      - Key: Name
+  #        Value: !Sub ${EnvironmentName}-PUB3-2c-RT
+#
+  #PublicSubnet3Route1:
+  #  Type: AWS::EC2::Route
+  #  Properties:
+  #    RouteTableId: !Ref PublicRouteTable3
+  #    DestinationCidrBlock: 0.0.0.0/0
+  #    VpcEndpointId: !Ref GWLBe3
+#
+  #PublicSubnet3Route2:
+  #  DependsOn: TGWAttachment
+  #  Type: AWS::EC2::Route
+  #  Properties:
+  #    RouteTableId: !Ref PublicRouteTable3
+  #    DestinationCidrBlock: 10.0.0.0/8
+  #    TransitGatewayId: !Ref TransitGatewayId
+  #
+  #PublicSubnet3RouteTableAssociation:
+  #  Type: AWS::EC2::SubnetRouteTableAssociation
+  #  Properties:
+  #    RouteTableId: !Ref PublicRouteTable3
+  #    SubnetId: !Ref PublicSubnet3
+
+#  PrivateRouteTable1:
+#    Type: AWS::EC2::RouteTable
+#    Properties:
+#      VpcId: !Ref VPC
+#      Tags:
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-PRIV1-2a-RT
+#
+#  PrivateSubnet1Route1:
+#    DependsOn: TGWAttachment
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref PrivateRouteTable1
+#      DestinationCidrBlock: 0.0.0.0/0
+#      TransitGatewayId: !Ref TransitGatewayId
+#
+#  PrivateSubnet1RouteTableAssociation:
+#    Type: AWS::EC2::SubnetRouteTableAssociation
+#    Properties:
+#      RouteTableId: !Ref PrivateRouteTable1
+#      SubnetId: !Ref PrivateSubnet1
+#
+#  PrivateRouteTable2:
+#    Type: AWS::EC2::RouteTable
+#    Properties:
+#      VpcId: !Ref VPC
+#      Tags:
+#        - Key: Name
+#          Value: !Sub ${EnvironmentName}-PRIV2-2b-RT
+#
+#  PrivateSubnet2Route1:
+#    DependsOn: TGWAttachment
+#    Type: AWS::EC2::Route
+#    Properties:
+#      RouteTableId: !Ref PrivateRouteTable2
+#      DestinationCidrBlock: 0.0.0.0/0
+#      TransitGatewayId: !Ref TransitGatewayId
+#
+#  PrivateSubnet2RouteTableAssociation:
+#    Type: AWS::EC2::SubnetRouteTableAssociation
+#    Properties:
+#      RouteTableId: !Ref PrivateRouteTable2
+#      SubnetId: !Ref PrivateSubnet2
+  
+  #PrivateRouteTable3:
+  #  Type: AWS::EC2::RouteTable
+  #  Properties:
+  #    VpcId: !Ref VPC
+  #    Tags:
+  #      - Key: Name
+  #        Value: !Sub ${EnvironmentName}-PRIV3-2c-RT
+#
+  #PrivateSubnet3Route1:
+  #  DependsOn: TGWAttachment
+  #  Type: AWS::EC2::Route
+  #  Properties:
+  #    RouteTableId: !Ref PrivateRouteTable3
+  #    DestinationCidrBlock: 0.0.0.0/0
+  #    TransitGatewayId: !Ref TransitGatewayId
+#
+  #PrivateSubnet3RouteTableAssociation:
+  #  Type: AWS::EC2::SubnetRouteTableAssociation
+  #  Properties:
+  #    RouteTableId: !Ref PrivateRouteTable3
+  #    SubnetId: !Ref PrivateSubnet3
+
+  PrivateSubnetOutputParameters:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub ${EnvironmentName}-private-subnets
+      Type: String
+      Value: !Join [ ",", [ !Ref PrivateSubnet1, !Ref PrivateSubnet2 ]]
+      Tier: Standard
+      Description: !Sub Private Subnets for ${EnvironmentName} vpc.
+      AllowedPattern: "(?!^ +$)^.+$"
+      Tags:
+        Name: !Sub ${EnvironmentName}-private-subnets
+  
+  PublicSubnetOutputParameters:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub ${EnvironmentName}-public-subnets
+      Type: String
+      Value: !Join [ ",", [ !Ref PublicSubnet1, !Ref PublicSubnet2 ]]
+      Tier: Standard
+      Description: !Sub Public Subnets for ${EnvironmentName} vpc.
+      AllowedPattern: "(?!^ +$)^.+$"
+      Tags:
+        Name: !Sub ${EnvironmentName}-public-subnets
+
+  DefaultNoIngressSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: "no-ingress-sg"
+      GroupDescription: "Security group with no ingress rule"
+      VpcId: !Ref VPC
+
+  IngressSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+        GroupDescription: Allow http and https to client host
+        VpcId: !Ref VPC
+        SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  PrivateSubnets:
+    Description: A list of the private subnets
+    Value: !Join [ ",", [ !Ref PrivateSubnet1, !Ref PrivateSubnet2 ]]
+
+  PublicSubnets:
+    Description: A list of the public subnets
+    Value: !Join [ ",", [ !Ref PublicSubnet1, !Ref PublicSubnet2 ]]
+
+  SecurityGroup:
+    Description: A list of the security groups
+    Value: !Join [ ",", [ !Ref DefaultNoIngressSecurityGroup, !Ref IngressSecurityGroup ]]

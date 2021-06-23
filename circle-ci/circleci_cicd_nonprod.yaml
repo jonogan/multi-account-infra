@@ -76,16 +76,22 @@ Resources:
       - arn:aws:iam::aws:policy/AWSLambda_FullAccess
 
 #S3 Bucket for artifacts
-  DevS3Bucket:
+  SamCacheBucket:
     Type: 'AWS::S3::Bucket'
     DeletionPolicy: Retain
     Properties:
-      BucketName: dev-circleci-artifacts-us-west-2
+      BucketName: sam-cache-aws-demo-us-west-2
 
-  QAS3Bucket:
-    Type: 'AWS::S3::Bucket'
-    DeletionPolicy: Retain
-    Properties:
-      BucketName: qa-circleci-artifacts-us-west-2
+#  DevS3Bucket:
+#    Type: 'AWS::S3::Bucket'
+#    DeletionPolicy: Retain
+#    Properties:
+#      BucketName: dev-circleci-artifacts-us-west-2
+#
+#  QAS3Bucket:
+#    Type: 'AWS::S3::Bucket'
+#    DeletionPolicy: Retain
+#    Properties:
+#      BucketName: qa-circleci-artifacts-us-west-2
 
   
