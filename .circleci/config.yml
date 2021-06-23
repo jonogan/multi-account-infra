@@ -55,6 +55,7 @@ jobs:
       - install_env_dependencies
       - stack_deploy:
           lane: dev
+          accountDeployRole: arn:aws:iam::806404699474:role/AccountDeployRole
           stack_name: *stack_name
           #artifacts_bucket: *artifacts_bucket
           parameter_override_file: "lane_deploy_dev02.params"
@@ -170,7 +171,7 @@ commands:
         default: "./lane_deploy.yaml"
         type: string
       accountDeployRole:
-        default: "arn:aws:iam::<<parameters.nonprod_accountid>>:role/AccountDeployRole"
+        default: "arn:aws:iam::806404699474:role/AccountDeployRole"
         type: string
     steps:
       - assume_role:
