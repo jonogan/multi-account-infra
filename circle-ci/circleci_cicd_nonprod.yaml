@@ -77,11 +77,11 @@ Resources:
       - arn:aws:iam::aws:policy/AWSLambda_FullAccess
 
 #S3 Bucket for artifacts
-  SamCacheBucket:
-    Type: 'AWS::S3::Bucket'
-    DeletionPolicy: Retain
-    Properties:
-      BucketName: sam-cache-aws-demo-us-west-2
+#  SamCacheBucket:
+#    Type: 'AWS::S3::Bucket'
+#    DeletionPolicy: Retain
+#    Properties:
+#      BucketName: sam-cache-aws-demo-us-west-2
 
 #  DevS3Bucket:
 #    Type: 'AWS::S3::Bucket'

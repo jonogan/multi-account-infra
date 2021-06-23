@@ -80,7 +80,7 @@ jobs:
       - install_env_dependencies
       - stack_deploy:
           lane: stg-01
-          accountDeployRole: arn:aws:iam::236771403467:role/AccountDeployRole
+          accountDeployRole: arn:aws:iam::115384200684:role/AccountDeployRole
           stack_name: *stack_name
           #artifacts_bucket: *artifacts_bucket
           parameter_override_file: "lane_deploy_stg.params"
@@ -93,7 +93,7 @@ jobs:
       - install_env_dependencies
       - stack_deploy:
           lane: prod-01
-          accountDeployRole: arn:aws:iam::236771403467:role/AccountDeployRole
+          accountDeployRole: arn:aws:iam::115384200684:role/AccountDeployRole
           stack_name: *stack_name
           #artifacts_bucket: *artifacts_bucket
           parameter_override_file: "lane_deploy_prod.params"
