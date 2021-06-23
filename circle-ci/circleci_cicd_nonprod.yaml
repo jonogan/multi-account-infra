@@ -37,6 +37,7 @@ Resources:
       - arn:aws:iam::aws:policy/AWSLambda_FullAccess
       - arn:aws:iam::aws:policy/AWSCloudFormationFullAccess
       - arn:aws:iam::aws:policy/AmazonSSMFullAccess
+      - arn:aws:iam::aws:policy/AmazonAPIGatewayAdministrator
   
   #Role that allows for infrastructure to be deployed via CI/CD
   AccountDeployRole:

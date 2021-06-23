@@ -8,7 +8,7 @@ custom:
   - &prod_params Lane=prod
   - &template_path ./lane_deploy/lane_deploy.yaml
   - &nonprod_accountid 806404699474
-  - &prod_accountid 806404699474
+  - &prod_accountid 115384200684
 
 
 ################# The pipeline #################

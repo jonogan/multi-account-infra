@@ -14,7 +14,7 @@ Resources:
         Statement:
         - Effect: Allow
           Principal:
-            AWS: arn:aws:iam::107887637814:user/circleci-deploy-user
+            AWS: arn:aws:iam::791134446342:user/circleci-deploy-user
           Action: sts:AssumeRole
       Policies:
         - PolicyName:
@@ -37,6 +37,7 @@ Resources:
       - arn:aws:iam::aws:policy/AWSLambda_FullAccess
       - arn:aws:iam::aws:policy/AWSCloudFormationFullAccess
       - arn:aws:iam::aws:policy/AmazonSSMFullAccess
+      - arn:aws:iam::aws:policy/AmazonAPIGatewayAdministrator
   
   #Role that allows for infrastructure to be deployed via CI/CD
   AccountDeployRole:
@@ -48,7 +49,7 @@ Resources:
         Statement:
         - Effect: Allow
           Principal:
-            AWS: arn:aws:iam::107887637814:user/circleci-deploy-user
+            AWS: arn:aws:iam::791134446342:user/circleci-deploy-user
           Action: sts:AssumeRole
       Policies:
         - PolicyName:
@@ -75,28 +76,13 @@ Resources:
       - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
       - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
       - arn:aws:iam::aws:policy/AWSLambda_FullAccess
-  
-  #Role that allows for infrastructure to be deployed via CI/CD
-  ExternalSecretsRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: ExternalSecretsRole
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Principal:
-            Federated: arn:aws:iam::236771403467:oidc-provider/oidc.eks.us-west-2.amazonaws.com/id/05684C55652D6E45DA9501BA393651E5
-          Action: sts:AssumeRole
-      ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
 
 #S3 Bucket for artifacts
-  ArtifactsS3Bucket:
+  SamCacheBucket:
     Type: 'AWS::S3::Bucket'
     DeletionPolicy: Retain
     Properties:
-      BucketName: circleci-artifacts-us-west-2
+      BucketName: sam-cache-aws-demo-us-west-2
 
   #ProdS3Bucket:
   #  Type: 'AWS::S3::Bucket'
@@ -109,10 +95,5 @@ Resources:
   #  DeletionPolicy: Retain
   #  Properties:
   #    BucketName: prod-circleci-artifacts-us-west-2
-  
-  SAMCacheBucket:
-    Type: 'AWS::S3::Bucket'
-    DeletionPolicy: Retain
-    Properties:
-      BucketName: sam-cache-us-west-2
+
   
